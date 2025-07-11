@@ -7,13 +7,13 @@
 AnalogViewer::AnalogViewer(double _samplingRate, HardwareSettings* hardware_settings_ptr) : m_hardwareSettingsPtr(hardware_settings_ptr)
 {
 
-    QFile file(":/icons/img/stylesheet.qss");
-    if(!file.open(QFile::ReadOnly))
-        qDebug()<<"could not open stylesheet file";
-    QString styleSheet = QLatin1String(file.readAll());
-    this->setStyleSheet(styleSheet);
+    // QFile file(":/icons/img/stylesheet.qss");
+    // if(!file.open(QFile::ReadOnly))
+    //     qDebug()<<"could not open stylesheet file";
+    // QString styleSheet = QLatin1String(file.readAll());
+    // this->setStyleSheet(styleSheet);
 
-    this->setWindowIcon(QIcon(":/icons/img/wave-icon.png"));
+    // this->setWindowIcon(QIcon(":/icons/img/wave-icon.png"));
     samplingRate = _samplingRate;
     //double ai_fs = samplingRate;
 
