@@ -4,10 +4,11 @@
 #include <QMainWindow>
 #include <QDir>
 #include <QTimer>
+#include <QVector>
 #include "analogviewer.h"
 #include "analoginput.h"
 #include "float64datasaver.h"
-
+#include "NIDAQmx.h"
 namespace Ui {
 class NirsControlForm;
 }
@@ -24,12 +25,12 @@ private slots:
     void stopAcquisition();
     void saveData(bool flag);
     void setSaveDir();
-    void updateDigitalOutput();
+    void updateIllumination();
+    void analogViewClosed();
 
 private:
     Ui::NirsControlForm *ui;
-    TaskHandle m_taskHandleDigitalOut;
-    TaskHandle m_taskHandleClock;
+    TaskHandle m_taskHandleIllumination;
     AnalogViewer* m_analogView;
     AnalogInput* m_analogInput;
     bool m_bSaveData;
@@ -38,8 +39,9 @@ private:
     QString m_saveName;
     QTimer* m_viewTimer;
     int m_currentEmitterIndex;
+    QVector<QVector<uInt8>> m_illumStates;
     int32 m_error;
-    // Assume m_hardwareSettings is defined elsewhere
+    HardwareSettings m_hardwareSettings;
 };
 
 #endif // NIRSCONTROLFORM_H
