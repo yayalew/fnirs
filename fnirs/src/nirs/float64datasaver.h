@@ -154,7 +154,7 @@ inline void Float64DataSaver::run()
         {
             // Change file when we have a chunk
             if(file.isOpen()) file.close();
-            tmp=QString("%1_%2.bin").arg(p_file_prefix.toUtf8()).arg(file_num,5,10,QLatin1Char('0'));
+            tmp=QString("%1_%2.bin").arg(QString(p_file_prefix)).arg(file_num,5,10,QLatin1Char('0'));
             tmp=parent_dir.absolutePath()+ QDir::separator()+tmp;
             file.setFileName(tmp);
             file.open(QIODevice::WriteOnly);
