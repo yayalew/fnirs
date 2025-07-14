@@ -53,7 +53,6 @@ void NirsControlForm::startAcquisition()
         exit(-1);
     }
 
-    // Saving config
     if (m_bSaveData)
     {
         m_saveName = ui->lineEdit_datasetName->text();
@@ -66,27 +65,53 @@ void NirsControlForm::startAcquisition()
         m_dataSaverAnalogInputs->startSaving();
     }
 
-    // Illumination config for 20 emitters across port0/0:7, port1/0:7, port2/0:3
-    const int numEmitters = 24;
-    m_illumStates.resize(numEmitters);
-    for (int i = 0; i < numEmitters; ++i) {
-        m_illumStates[i].resize(numEmitters);
-        m_illumStates[i].fill(0); // All lines LOW
-        m_illumStates[i][i] = 1;  // Set one line HIGH
-    }
-    m_currentEmitterIndex = 0;
-
     try {
-        // Ensure no residual task exists
         if (m_taskHandleIllumination) {
             DAQmxStopTask(m_taskHandleIllumination);
             DAQmxClearTask(m_taskHandleIllumination);
         }
-        // Create digital output task for 20 emitters (software-timed)
+
+        const int numEmitters = 4;
+        double emitterRate = acq_rate * numEmitters;  // 2 emitters per acquisition frame
+
+        QVector<uInt32> pattern = {
+            0b00000001, // line 0 on
+            0b00000010  // line 1 on
+        };
+
+        QVector<uInt32> fullBuffer;
+        int frameRepeats = 50;  // 50 full frames (2 samples per frame)
+        for (int i = 0; i < frameRepeats; ++i)
+            fullBuffer += pattern;
+
         DAQmxErrChk(DAQmxCreateTask("Illumination", &m_taskHandleIllumination));
-        DAQmxErrChk(DAQmxCreateDOChan(m_taskHandleIllumination, "/Dev2/port0/line0:7,/Dev2/port1/line0:7,/Dev2/port2/line0:7", "", DAQmx_Val_ChanPerLine));
-        // Write initial digital pattern (software-timed)
-        DAQmxErrChk(DAQmxWriteDigitalLines(m_taskHandleIllumination, 1, 1, 10.0, DAQmx_Val_GroupByChannel, m_illumStates[m_currentEmitterIndex].data(), nullptr, nullptr));
+        DAQmxErrChk(DAQmxCreateDOChan(
+            m_taskHandleIllumination,
+            "/Dev2/port0/line0:1",
+            "",
+            DAQmx_Val_ChanForAllLines
+        ));
+
+        DAQmxErrChk(DAQmxCfgSampClkTiming(
+            m_taskHandleIllumination,
+            "", // use internal DO clock
+            emitterRate,
+            DAQmx_Val_Rising,
+            DAQmx_Val_ContSamps,
+            fullBuffer.size()
+        ));
+
+        DAQmxErrChk(DAQmxWriteDigitalU32(
+            m_taskHandleIllumination,
+            fullBuffer.size(),
+            false,  // do not autostart
+            10.0,
+            DAQmx_Val_GroupByScanNumber,
+            fullBuffer.data(),
+            nullptr,
+            nullptr
+        ));
+
     } catch (DAQException& e) {
         char errBuff[2048] = {'\0'};
         DAQmxGetErrorString(e.getError(), errBuff, 2048);
@@ -99,12 +124,9 @@ void NirsControlForm::startAcquisition()
 
     m_analogInput->setAnalogViewer(m_analogView);
 
-    // Start everything in the right order
     try {
         DAQmxErrChk(DAQmxStartTask(m_taskHandleIllumination));
         m_analogInput->Start(false);
-
-        m_viewTimer->start(1000 / acq_rate); // Update at acquisition rate (e.g., 50 ms for 20 Hz)
     } catch (DAQException& e) {
         char errBuff[2048] = {'\0'};
         DAQmxGetErrorString(e.getError(), errBuff, 2048);
@@ -115,6 +137,14 @@ void NirsControlForm::startAcquisition()
         exit(-1);
     }
 }
+
+
+
+
+
+
+
+
 
 void NirsControlForm::stopAcquisition()
 {
