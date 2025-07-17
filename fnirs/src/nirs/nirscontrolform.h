@@ -25,12 +25,12 @@ private slots:
     void stopAcquisition();
     void saveData(bool flag);
     void setSaveDir();
-    void updateIllumination();
     void analogViewClosed();
 
 private:
     Ui::NirsControlForm *ui;
     TaskHandle m_taskHandleIllumination;
+    TaskHandle m_taskHandlePWM;
     AnalogViewer* m_analogView;
     AnalogInput* m_analogInput;
     bool m_bSaveData;
@@ -40,6 +40,7 @@ private:
     QTimer* m_viewTimer;
     int m_currentEmitterIndex;
     QVector<QVector<uInt8>> m_illumStates;
+    unsigned int m_intensity;
     int32 m_error;
     HardwareSettings m_hardwareSettings;
 };
