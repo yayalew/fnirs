@@ -164,8 +164,6 @@ void NirsControlForm::stopAcquisition()
     delete m_analogView;
     m_analogView = nullptr;
 
-    m_analogInput->resetDataSaver();
-
     if (m_taskHandleIllumination) {
         DAQmxStopTask(m_taskHandleIllumination);
         DAQmxClearTask(m_taskHandleIllumination);
