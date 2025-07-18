@@ -17,27 +17,20 @@ public:
     void Stop();
     void run();
     void SetDataSaver(Float64DataSaver* data_saver_ptr);
-    void resetDataSaver(){p_data_saver_ptr = 0;}
     void setAnalogViewer(AnalogViewer* ptr);
-
-    // add a set_samplingrate function to pass the sampling rate, KP
-    //void set_AnalogSamplingRate(int sam_rate);
 
 private:
     TaskHandle p_ai_task_handle;
-    Float64DataSaver* p_data_saver_ptr;
-    AnalogViewer* av_ptr;
-
-    bool m_isThreadStarted;
-    QMutex m_mutex;
     int32 m_taskError;
+    int SAMPLINGRATE;
     double* dataForSaving;
     int counterSaving;
-
-    int SAMPLINGRATE = 10000;
-
-    // Change variable type to allow samplingRate being controlled by the user, KP
-    //int SAMPLINGRATE;
+    Float64DataSaver* p_data_saver_ptr;
+    AnalogViewer* av_ptr;
+    bool m_isThreadStarted;
+    QMutex m_mutex;
 };
 
 #endif // ANALOGINPUT_H
+
+
